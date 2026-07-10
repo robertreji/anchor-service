@@ -1,0 +1,28 @@
+{
+  "name": "anchor-service",
+  "version": "1.0.0",
+  "description": "Standalone background coordinator and API proxy for SDF Anchor Platform and Stellar blockchain",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "dependencies": {
+    "@stellar-pay/shared": "file:../shared",
+    "@stellar/stellar-sdk": "^15.1.0",
+    "better-sqlite3": "^12.11.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  }
+}
