@@ -303,3 +303,7 @@ app.listen(PORT, () => {
 
 // Import and start withdrawal observer background loop
 import "./withdraw-observer";
+
+// Import and start remittance payment watcher background loop
+import "./payment-watcher";
+// Touch to reload nodemon config
