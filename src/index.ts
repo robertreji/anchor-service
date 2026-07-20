@@ -4,9 +4,6 @@ import dotenv from "dotenv";
 import { getPendingWithdrawal, savePendingWithdrawal } from "./db";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
-// Allow HTTP fetching to hit self-signed local Next.js HTTPS dev servers
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 dotenv.config();
 
 const app = express();
@@ -17,8 +14,11 @@ const PORT = process.env.PORT || 3003;
 const ANCHOR_API_KEY = process.env.ANCHOR_API_KEY;
 const PLATFORM_API_URL = process.env.PLATFORM_API_URL || "http://localhost:8085";
 const HORIZON_URL = process.env.NEXT_PUBLIC_HORIZON_URL || "https://horizon-testnet.stellar.org";
-const DIST_SECRET = process.env.ANCHOR_DISTRIBUTION_SECRET || "SCD63ZJ2DNEDU5RO5F7S245PYE5DNI3KNIKOOVLY3GZRHIUC3HNWLKHZ";
-const USDC_ISSUER = process.env.NEXT_PUBLIC_USDC_ISSUER || "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
+const DIST_SECRET = process.env.ANCHOR_DISTRIBUTION_SECRET;
+if (!DIST_SECRET) {
+  throw new Error("ANCHOR_DISTRIBUTION_SECRET environment variable is required");
+}
+const USDC_ISSUER = process.env.NEXT_PUBLIC_USDC_ISSUER || "GAJ553PWUPQDOJBP33JKEHXJXCGT5QTU7U245Y243MMQUA4QBQIJ55ND";
 
 // Initialize horizon connection
 const horizon = new StellarSdk.Horizon.Server(HORIZON_URL);
@@ -261,6 +261,9 @@ app.post("/api/anchor/webhook", authenticate, async (req, res) => {
       console.log(`[anchor-service] Successfully submitted USDC payment. Tx Hash: ${txHash}`);
     } catch (err: any) {
       console.error("[anchor-service] Failed to send USDC payment on-chain:", err.message);
+      if (err.response?.data) {
+        console.error("[anchor-service] Horizon error details:", JSON.stringify(err.response.data, null, 2));
+      }
       
       try {
         await callPlatformRpc("notify_transaction_error", {
