@@ -229,9 +229,17 @@ app.post("/api/anchor/webhook", authenticate, async (req, res) => {
       const sourceAccount = await horizon.loadAccount(keypair.publicKey());
       const usdcAsset = new StellarSdk.Asset("USDC", usdcIssuer);
 
+      const networkPassphrase = HORIZON_URL.includes("testnet")
+        ? StellarSdk.Networks.TESTNET
+        : StellarSdk.Networks.PUBLIC;
+
+      const fee = HORIZON_URL.includes("testnet")
+        ? StellarSdk.BASE_FEE
+        : "10000";
+
       const builder = new StellarSdk.TransactionBuilder(sourceAccount, {
-        fee: StellarSdk.BASE_FEE,
-        networkPassphrase: StellarSdk.Networks.TESTNET,
+        fee: fee,
+        networkPassphrase: networkPassphrase,
       });
 
       if (txData.memo) {
