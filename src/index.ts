@@ -162,6 +162,29 @@ app.post("/api/anchor/transactions/withdraw", authenticate, async (req, res) => 
   }
 });
 
+// 3.5. POST /api/anchor/transactions/onchain-received
+// Transitions status to pending_anchor when on-chain funds are submitted by user
+app.post("/api/anchor/transactions/onchain-received", authenticate, async (req, res) => {
+  const { transactionId, stellarTxHash } = req.body;
+  if (!transactionId || !stellarTxHash) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    console.log(`[anchor-service] Notifying Platform of onchain funds received for tx ${transactionId} (hash: ${stellarTxHash})...`);
+    await callPlatformRpc("notify_onchain_funds_received", {
+      transaction_id: transactionId,
+      stellar_transaction_id: stellarTxHash,
+      message: "On-chain funds received. Processing withdrawal payout.",
+    });
+
+    return res.json({ success: true, message: "Transaction state updated to pending_anchor." });
+  } catch (error: any) {
+    console.error("Platform RPC notify_onchain_funds_received error:", error);
+    return res.status(500).json({ error: error.message || "Failed to notify onchain funds received" });
+  }
+});
+
 // 4. POST /api/anchor/webhook
 // Receives deposit transfer webhook from Bank, submits on-chain USDC payment
 app.post("/api/anchor/webhook", authenticate, async (req, res) => {
